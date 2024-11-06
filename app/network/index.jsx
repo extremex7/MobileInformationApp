@@ -9,34 +9,36 @@ import {
 import { useEffect, useState, useCallback } from "react";
 import * as Network from "expo-network";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Link } from "expo-router";
 
 export default function NetworkScreen() {
   const [networkInfo, setNetworkInfo] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const getNetworkInfo = async () => {
-    const networkState = await Network.getNetworkStateAsync();
-    const ip = await Network.getIpAddressAsync();
-    const ipv4 = await Network.getIpAddressAsync({ type: "4" });
-    const ipv6 = await Network.getIpAddressAsync({ type: "6" });
+    try {
+      const networkState = await Network.getNetworkStateAsync();
+      const ip = await Network.getIpAddressAsync();
+      const ipv4 = await Network.getIpAddressAsync({ type: "4" });
+      const ipv6 = await Network.getIpAddressAsync({ type: "6" });
 
-    // Only check airplane mode on Android
-    const isAirplaneMode =
-      Platform.OS === "android"
-        ? await Network.isAirplaneModeEnabledAsync()
-        : null;
+      const isAirplaneMode =
+        Platform.OS === "android"
+          ? await Network.isAirplaneModeEnabledAsync()
+          : null;
 
-    setNetworkInfo({
-      type: networkState.type,
-      isConnected: networkState.isConnected,
-      isInternetReachable: networkState.isInternetReachable,
-      isWifiEnabled: networkState.isWifiEnabled,
-      ip,
-      ipv4,
-      ipv6,
-      ...(Platform.OS === "android" && { isAirplaneMode }),
-    });
+      setNetworkInfo({
+        type: networkState.type,
+        isConnected: networkState.isConnected,
+        isInternetReachable: networkState.isInternetReachable,
+        isWifiEnabled: networkState.isWifiEnabled,
+        ip,
+        ipv4,
+        ipv6,
+        ...(Platform.OS === "android" && { isAirplaneMode }),
+      });
+    } catch (error) {
+      console.log("Network info:", error);
+    }
   };
 
   const onRefresh = useCallback(async () => {
@@ -106,12 +108,6 @@ export default function NetworkScreen() {
                   {networkInfo.isConnected ? "Connected" : "Disconnected"}
                 </Text>
               </View>
-              {/* <Link href="/network/speed-test" asChild>
-                <Pressable className="mt-4 flex-row items-center">
-                  <MaterialCommunityIcons name="speedometer" size={24} color="#10b981" />
-                  <Text className="text-green-500 text-lg ml-2">Run Speed Test</Text>
-                </Pressable>
-              </Link> */}
             </>
           )}
         </View>
